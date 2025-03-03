@@ -32,11 +32,12 @@ jobs:
         run: |
           msbuild.exe CSharp-TuT.sln /p:platform="Any CPU" /p:configuration="Release"
       
-      - name: Find DLL
-        id: find-dll
+       - name: Find DLL and PDB files
+        id: find-files
         run: |
-          $dllPath = Get-ChildItem -Recurse -Path . -Filter *.dll | Where-Object { $_.FullName -like "*bin\Release\*" } | Select-Object -First 1 -ExpandProperty FullName
-          echo "::set-output name=dllPath::$dllPath"
+          $files = Get-ChildItem -Recurse -Path . -Include *.dll, *.pdb | Where-Object { $_.FullName -like "*bin\Release\*" }
+          $filePaths = $files | ForEach-Object { $_.FullName }
+          echo "filePaths=$($filePaths -join '|')" >> $GITHUB_OUTPUT
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
@@ -45,9 +46,12 @@ jobs:
           token: ${{ secrets.REPOB_PAT }}
           path: RepoB
 
-      - name: Copy DLL to repoB/plugins
+      - name: Copy DLL and PDB files to repoB/plugins
         run: |
-          Copy-Item -Path "${{ steps.find-dll.outputs.dllPath }}" -Destination "RepoB/plugins/"
+          $filePaths = "${{ steps.find-files.outputs.filePaths }}" -split '\|'
+          foreach ($filePath in $filePaths) {
+            Copy-Item -Path $filePath -Destination "RepoB/plugins/"
+          }
 
       - name: Commit and Push to RepoB
         run: |
@@ -55,6 +59,6 @@ jobs:
           git config --global user.email "forcina.giacomo@gmail.com"
           git config --global user.name "Giacogiak"
           git add .
-          git commit -m "Auto-update DLLs from RepoA" || echo "No changes to commit"
+          git commit -m "Auto-update DLLs and PDBs from RepoA" || echo "No changes to commit"
           git push
         shell: pwsh
