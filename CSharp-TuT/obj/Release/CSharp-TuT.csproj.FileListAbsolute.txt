@@ -1,0 +1,9 @@
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\bin\Release\CSharp-TuT.exe.config
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\bin\Release\CSharp-TuT.exe
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\bin\Release\CSharp-TuT.pdb
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\obj\Release\CSharp-TuT.csproj.CoreCompileInputs.cache
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\obj\Release\CSharp-TuT.exe
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\obj\Release\CSharp-TuT.pdb
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\bin\Release\Newtonsoft.Json.dll
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\obj\Release\CSharp-TuT.csproj.AssemblyReference.cache
+C:\Users\Giac-Spentys\source\repos\CSharp-TuT\CSharp-TuT\obj\Release\CSharp-TuT.csproj.CopyComplete
