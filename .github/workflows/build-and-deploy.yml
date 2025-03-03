@@ -39,8 +39,10 @@ jobs:
           if ($files) {
             $filePaths = $files | ForEach-Object { $_.FullName }
             Write-Output "Found files: $($filePaths -join ', ')"
-            echo "filePaths=$($filePaths -join '|')" >> $GITHUB_OUTPUT} 
-            else {Write-Output "No .dll or .pdb files found in bin\Release"}
+            echo "filePaths=$($filePaths -join '|')" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Output "No .dll or .pdb files found in bin\Release"
+          }
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
