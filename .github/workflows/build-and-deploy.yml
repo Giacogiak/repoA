@@ -32,7 +32,7 @@ jobs:
         run: |
           msbuild.exe CSharp-TuT.sln /p:platform="Any CPU" /p:configuration="Release"
       
-       - name: Find DLL and PDB files
+      - name: Find DLL and PDB files
         id: find-files
         run: |
           $files = Get-ChildItem -Recurse -Path . -Include *.dll, *.pdb | Where-Object { $_.FullName -like "*bin\Release\*" }
