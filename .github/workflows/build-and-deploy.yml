@@ -7,42 +7,51 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Use Windows runner for .NET Framework
 
     steps:
       - name: Checkout RepoA
         uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0.0  # Change this to match your project version
+      - name: Install .NET Framework 4.5 Developer Pack
+        run: |
+          Invoke-WebRequest -Uri "https://download.microsoft.com/download/F/7/8/F78B4E1B-84DC-4041-8675-18E8F5876B27/NDP45-DevPack-KB2828136-x86-x64.exe" -OutFile "dotnet4.5.exe"
+          Start-Process -FilePath "dotnet4.5.exe" -ArgumentList "/quiet", "/norestart" -Wait
+        shell: powershell
 
-      - name: Restore Dependencies
-        run: dotnet restore CSharp-TuT.sln
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
-      - name: Build Solution
-        run: dotnet build CSharp-TuT.sln --configuration Release --no-restore
+      - name: Restore NuGet Packages
+        run: nuget restore RepoA.sln
 
-      - name: Copy Artifacts
+      - name: Build with MSBuild
+        run: msbuild CSharp-TuT.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Find and Copy DLLs and LIBs
         run: |
           mkdir -p artifacts
-          find . -type f \( -name "*.dll" -o -name "*.lib" \) -exec cp {} artifacts/ \;
+          Get-ChildItem -Path . -Include *.dll, *.lib -Recurse | Copy-Item -Destination artifacts -Force
+        shell: pwsh
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
         with:
-          repository: Giacogiak/RepoB
+          repository: your-username/RepoB
           token: ${{ secrets.REPOB_PAT }}
 
       - name: Move Artifacts to RepoB
         run: |
-          cp -r artifacts/* RepoB/plugins/
+          mkdir -p RepoB/plugins
+          Copy-Item -Path artifacts/* -Destination RepoB/plugins/ -Recurse -Force
+        shell: pwsh
 
       - name: Commit and Push to RepoB
         run: |
           cd RepoB
-          git config --global user.email "your-email@example.com"
+          git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
-          git commit -m "Auto-update DLLs from RepoA"
+          git add .
+          git commit -m "Auto-update DLLs from RepoA" || echo "No changes to commit"
           git push
+        shell: pwsh
