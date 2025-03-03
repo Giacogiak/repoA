@@ -7,26 +7,27 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout RepoA
         uses: actions/checkout@v3
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.0  # Change this to match your project version
 
-      - name: Restore NuGet Packages
-        run: nuget restore CSharp-TuT.sln
+      - name: Restore Dependencies
+        run: dotnet restore CSharp-TuT.sln
 
       - name: Build Solution
-        run: msbuild CSharp-TuT.sln /p:Configuration=Release /p:Platform="Any CPU"
+        run: dotnet build CSharp-TuT.sln --configuration Release --no-restore
 
-      - name: Find and Copy DLLs and LIBs
+      - name: Copy Artifacts
         run: |
           mkdir -p artifacts
-          Get-ChildItem -Path . -Include *.dll, *.lib -Recurse | Copy-Item -Destination artifacts -Force
-        shell: pwsh
+          find . -type f \( -name "*.dll" -o -name "*.lib" \) -exec cp {} artifacts/ \;
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
@@ -41,7 +42,7 @@ jobs:
       - name: Commit and Push to RepoB
         run: |
           cd RepoB
-          git config --global user.email "forcina.giacomo@gmail.com"
+          git config --global user.email "your-email@example.com"
           git config --global user.name "github-actions"
           git commit -m "Auto-update DLLs from RepoA"
           git push
