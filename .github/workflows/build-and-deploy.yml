@@ -7,7 +7,13 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # Use Windows runner for .NET Framework
+    runs-on: windows-2019  # or windows-2019 if you want Visual Studio 2019
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v1
+        with:
+          vs-version: '16.0'  # Use Visual Studio 2019 (version 16.0)
 
     steps:
       - name: Checkout RepoA
