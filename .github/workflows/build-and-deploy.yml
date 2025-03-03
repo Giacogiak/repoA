@@ -7,36 +7,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout RepoA
         uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 4.5.0
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
-      - name: Restore Dependencies
-        run: dotnet restore CSharp-TuT.sln
+      - name: Restore NuGet Packages
+        run: nuget restore CSharp-TuT.sln
 
       - name: Build Solution
-        run: dotnet build CSharp-TuT.sln --configuration Release --no-restore
+        run: msbuild CSharp-TuT.sln /p:Configuration=Release /p:Platform="Any CPU"
 
-      - name: Copy Artifacts
+      - name: Find and Copy DLLs and LIBs
         run: |
           mkdir -p artifacts
-          find . -type f \( -name "*.dll" -o -name "*.lib" \) -exec cp {} artifacts/ \;
+          Get-ChildItem -Path . -Include *.dll, *.lib -Recurse | Copy-Item -Destination artifacts -Force
+        shell: pwsh
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
         with:
+          repository: Giacogiak/RepoB
           token: ${{ secrets.REPOB_PAT }}
 
       - name: Move Artifacts to RepoB
         run: |
-          mkdir -p RepoB/libs
           cp -r artifacts/* RepoB/plugins/
 
       - name: Commit and Push to RepoB
@@ -44,6 +43,5 @@ jobs:
           cd RepoB
           git config --global user.email "forcina.giacomo@gmail.com"
           git config --global user.name "github-actions"
-          git add libs/
           git commit -m "Auto-update DLLs from RepoA"
           git push
