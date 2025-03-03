@@ -22,11 +22,11 @@ jobs:
         run: |
           msbuild.exe CSharp-TuT.sln /p:platform="Any CPU" /p:configuration="Release"
       
-      - name: Find and Copy DLLs and LIBs
-        run: |
-          mkdir -p artifacts
-          Get-ChildItem -Path . -Include *.dll, *.lib -Recurse | Copy-Item -Destination artifacts -Force
-        shell: pwsh
+      name: Find DLL
+      id: find-dll
+      run: |
+        $dllPath = Get-ChildItem -Recurse -Path . -Filter *.dll | Where-Object { $_.FullName -like "*bin\Release\*" } | Select-Object -First 1 -ExpandProperty FullName
+        echo "::set-output name=dllPath::$dllPath"
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
@@ -34,10 +34,9 @@ jobs:
           repository: Giacogiak/RepoB
           token: ${{ secrets.REPOB_PAT }}
 
-      - name: Move Artifacts to RepoB
-        run: |
-          Copy-Item -Path artifacts/* -Destination RepoB/plugins/ -Recurse -Force
-        shell: pwsh
+       - name: Copy DLL to repoB/plugins
+      run: |
+        Copy-Item -Path "${{ steps.find-dll.outputs.dllPath }}" -Destination "repoB/plugins/"
 
       - name: Commit and Push to RepoB
         run: |
