@@ -36,8 +36,11 @@ jobs:
         id: find-files
         run: |
           $files = Get-ChildItem -Recurse -Path . -Include *.dll, *.pdb | Where-Object { $_.FullName -like "*bin\Release\*" }
-          $filePaths = $files | ForEach-Object { $_.FullName }
-          echo "filePaths=$($filePaths -join '|')" >> $GITHUB_OUTPUT
+          if ($files) {
+            $filePaths = $files | ForEach-Object { $_.FullName }
+            Write-Output "Found files: $($filePaths -join ', ')"
+            echo "filePaths=$($filePaths -join '|')" >> $GITHUB_OUTPUT} 
+            else {Write-Output "No .dll or .pdb files found in bin\Release"}
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
@@ -48,9 +51,13 @@ jobs:
 
       - name: Copy DLL and PDB files to repoB/plugins
         run: |
-          $filePaths = "${{ steps.find-files.outputs.filePaths }}" -split '\|'
-          foreach ($filePath in $filePaths) {
-            Copy-Item -Path $filePath -Destination "RepoB/plugins/"
+          if ("${{ steps.find-files.outputs.filePaths }}") {
+            $filePaths = "${{ steps.find-files.outputs.filePaths }}" -split '\|'
+            foreach ($filePath in $filePaths) {
+              Copy-Item -Path $filePath -Destination "RepoB/plugins/"
+            }
+          } else {
+            Write-Output "No files to copy."
           }
 
       - name: Commit and Push to RepoB
