@@ -9,9 +9,8 @@ jobs:
   build:
     runs-on: windows-2019  # or windows-2019 if you want Visual Studio 2019
     steps:
-      
       - name: Checkout repoA
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
       
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v1
@@ -25,21 +24,22 @@ jobs:
         run: |
           msbuild.exe CSharp-TuT.sln /p:platform="Any CPU" /p:configuration="Release"
       
-      name: Find DLL
-      id: find-dll
-      run: |
-        $dllPath = Get-ChildItem -Recurse -Path . -Filter *.dll | Where-Object { $_.FullName -like "*bin\Release\*" } | Select-Object -First 1 -ExpandProperty FullName
-        echo "::set-output name=dllPath::$dllPath"
+      - name: Find DLL
+        id: find-dll
+        run: |
+          $dllPath = Get-ChildItem -Recurse -Path . -Filter *.dll | Where-Object { $_.FullName -like "*bin\Release\*" } | Select-Object -First 1 -ExpandProperty FullName
+          echo "::set-output name=dllPath::$dllPath"
 
       - name: Checkout RepoB
         uses: actions/checkout@v3
         with:
           repository: Giacogiak/RepoB
           token: ${{ secrets.REPOB_PAT }}
+          path: RepoB
 
-       - name: Copy DLL to repoB/plugins
-      run: |
-        Copy-Item -Path "${{ steps.find-dll.outputs.dllPath }}" -Destination "repoB/plugins/"
+      - name: Copy DLL to repoB/plugins
+        run: |
+          Copy-Item -Path "${{ steps.find-dll.outputs.dllPath }}" -Destination "RepoB/plugins/"
 
       - name: Commit and Push to RepoB
         run: |
