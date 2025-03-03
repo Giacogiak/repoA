@@ -13,20 +13,16 @@ jobs:
       - name: Checkout RepoA
         uses: actions/checkout@v3
 
-       - name: Install .NET Framework 4.5 Developer Pack
-        run: |
-          choco install netfx-4.5-devpack -y --force
-        shell: pwsh
-
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
 
       - name: Restore NuGet Packages
-        run: nuget restore RepoA.sln
+        run: nuget restore CSharp-TuT.sln
 
       - name: Build with MSBuild
-        run: msbuild CSharp-TuT.sln /p:Configuration=Release /p:Platform="Any CPU"
-
+        run: |
+          msbuild.exe CSharp-TuT.sln /p:platform="Any CPU" /p:configuration="Release"
+      
       - name: Find and Copy DLLs and LIBs
         run: |
           mkdir -p artifacts
@@ -36,20 +32,19 @@ jobs:
       - name: Checkout RepoB
         uses: actions/checkout@v3
         with:
-          repository: your-username/RepoB
+          repository: Giacogiak/RepoB
           token: ${{ secrets.REPOB_PAT }}
 
       - name: Move Artifacts to RepoB
         run: |
-          mkdir -p RepoB/plugins
           Copy-Item -Path artifacts/* -Destination RepoB/plugins/ -Recurse -Force
         shell: pwsh
 
       - name: Commit and Push to RepoB
         run: |
           cd RepoB
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "github-actions"
+          git config --global user.email "forcina.giacomo@gmail.com"
+          git config --global user.name "Giacogiak"
           git add .
           git commit -m "Auto-update DLLs from RepoA" || echo "No changes to commit"
           git push
