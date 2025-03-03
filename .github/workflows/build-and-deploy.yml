@@ -15,9 +15,8 @@ jobs:
 
       - name: Install .NET Framework 4.5 Developer Pack
         run: |
-          Invoke-WebRequest -Uri "https://download.microsoft.com/download/F/7/8/F78B4E1B-84DC-4041-8675-18E8F5876B27/NDP45-DevPack-KB2828136-x86-x64.exe" -OutFile "dotnet4.5.exe"
-          Start-Process -FilePath "dotnet4.5.exe" -ArgumentList "/quiet", "/norestart" -Wait
-        shell: powershell
+          winget install --id Microsoft.DotNetFramework.DeveloperPack_4.5 -e --accept-package-agreements --accept-source-agreements
+        shell: pwsh
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
