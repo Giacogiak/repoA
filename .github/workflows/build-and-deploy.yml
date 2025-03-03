@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: windows-2019  # or windows-2019 if you want Visual Studio 2019
     steps:
+      - name: Checkout repoA
       - uses: actions/checkout@v3
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v1
